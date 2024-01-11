@@ -1,262 +1,206 @@
-import requests
-import folium
-import os
-import sqlalchemy.orm, sqlalchemy.orm.session
-from bs4 import BeautifulSoup
-from dotenv import load_dotenv
-load_dotenv()
+from tkinter import *
+import tkintermapview
+import tkinter
+from functions import Patients, Medical_facility, Employess, session
 
-db_params=sqlalchemy.engine.URL.create(
-    drivername='postgresql+psycopg2',
-    username=os.getenv('POSTGRES_USER'),
-    password=os.getenv('POSTGRES_PASSWORD'),
-    host=os.getenv('POSTGRES_HOST'),
-    database=os.getenv('POSTGRES_DB'),
-    port=os.getenv('POSTGRES_PORT')
-)
-engine = sqlalchemy.create_engine(db_params)
-connection = engine.connect()
-base = sqlalchemy.orm.declarative_base()
+patients=[]
+medical_facility=[]
+employess=[]
 
-Session = sqlalchemy.orm.sessionmaker(bind=engine)
-session = Session()
+def add_patient():
+    name=entry_name.get()
+    surname=entry_surname.get()
+    address = entry_address.get()
+    pesel_number=entry_pesel_number.get()
+    medical_facility=entry_medical_facility.get()
+    doctor=entry_doctor.get()
 
-class Patients(base):
-    __tablename__ = 'patients'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer(),primary_key=True)
-    name = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    surname = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    address = sqlalchemy.Column(sqlalchemy.CHAR(100), nullable=False)
-    pesel_number = sqlalchemy.Column(sqlalchemy.String(11), nullable=False)
-    medical_facility = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    doctor = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-
-    def __init__(self, name, surname, address, pesel_number, medical_facility, doctor):
-        self.name = name
-        self.surname = surname
-        self.address = address
-        self.pesel_number = pesel_number
-        self.medical_facility = medical_facility
-        self.doctor = doctor
-
-base.metadata.create_all(engine)
-
-class Medical_facility(base):
-    __tablename__ = 'medical_facilities'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)                                                  # typ serial (sam będzie odliczał)
-    name_of_clinic = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    address_of_clinic = sqlalchemy.Column(sqlalchemy.CHAR(100), nullable=False)
-    employee_name = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    employee_surname = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    employee_position = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-
-    def __init__(self, name_of_clinic, address_of_clinic, employee_name, employee_surname, employee_position):
-        self.name_of_clinic = name_of_clinic
-        self.address_of_clinic = address_of_clinic
-        self.employee_name = employee_name
-        self.employee_surname = employee_surname
-        self.employee_position = employee_position
-
-base.metadata.create_all(engine)
-
-class Employess(base):
-    __tablename__ = 'employess'
-
-    id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)
-    employee_name = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    employee_surname = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-    employee_adress = sqlalchemy.Column(sqlalchemy.CHAR(100), nullable=False)
-    employee_position = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
-
-    def __init__(self, employee_name, employee_surname, employee_adress, employee_position):
-        self.employee_name = employee_name
-        self.employee_surname = employee_surname
-        self.employee_adress = employee_adress
-        self.employee_position = employee_position
-
-base.metadata.create_all(engine)
-
-def add_patient_to(db) -> None:
-    """
-    add object to db
-    :param db: sql db
-    :return: None
-    """
-    name = input(('Podaj imię pacjenta: '))
-    surname = input('Podaj nazwisko pacjenta: ')
-    address = input('Podaj adres zamieszkania pacjenta: ')
-    pesel_number = input('Podaj numer PESEL pacjenta: ')
-    medical_facility = input('Podaj placówkę medyczną, do której przypisujesz pacjenta: ')
-    doctor = input('Podaj imię i nazwisko doktora prowadzącego, do której przypisujesz pacjenta: ')
-    db_insert = Patients(
-    name = name, surname = surname, address = address, pesel_number = pesel_number,
-    medical_facility = medical_facility, doctor = doctor
-    )
-    db.add(db_insert)
-    db.commit()
-
-def add_medical_facility_to(db) -> None:
-    """
-    # add object to db
-    # :param db: sql db                                                                                                 #TODO i weż te opisy funkcji ogarnij (ta i wszystkie poniżej-już nie będę tam pisał)
-    # :return: None
-    """
-    name_of_clinic = input(('Podaj nazwę placówki medycznej: '))
-    address_of_clinic = input('Podaj adres placówki medycznej: ')
-    employee_name = input('Podaj imię pracownika: ')                                                                    #TODO trzeba tu pętle wpierdolić żeby dodawała więcej pracowników!!!!!!!!!
-    employee_surname = input('Podaj nazwisko pracownika: ')
-    employee_position = input('Podaj stanowisko na jakim pracuje pracownik: ')                                          #TODO jakąś gotową listę rozwijaną może? ale to w tkinter
-    db_insert = Medical_facility(
-    name_of_clinic = name_of_clinic, address_of_clinic = address_of_clinic,
-    employee_name = employee_name, employee_surname = employee_surname,
-    employee_position = employee_position
-    )
-    db.add(db_insert)
-    db.commit()
-
-def add_employess_to(db) -> None:
-    """
-    # add object to db
-    # :param db: sql db
-    # :return: None
-    """
-    employee_name = input(('Podaj imię pracownika: '))
-    employee_surname = input('Podaj nazwisko pracownika: ')
-    employee_adress = input('Podaj adrez zamieszkania pracownika: ')
-    employee_position = input('Podaj stanowisko na jakim pracuje pracownik: ')
-    db_insert = Employess(
-    employee_name = employee_name, employee_surname=employee_surname,
-    employee_adress=employee_adress, employee_position=employee_position
-    )
-    db.add(db_insert)
-    db.commit()
-
-def remove_patient_from(db) -> None:
-    """
-    remove object from db
-    :param db: sql - db
-    :return: None
-    """
-    pesel_number=input('Podaj numer PESEL pacjenta do usunięcia: ')
-    patient_to_remove=session.query(Patients).filter(Patients.pesel_number==pesel_number)
-    if patient_to_remove:
-        for num, patient in enumerate(patient_to_remove):
-            print(f'Znaleziono pacjenta: \n{num+1}: {session.query(Patients.name)}, {Patients.surname}, {pesel_number} ')
-            print('0: Usuń wszystkich ')
-    numer=int(input(f'Wybierz użytkownika do usunięcia: '))
-    if numer == 0:
-        for patient in patient_to_remove:
-            session.delete(patient)
-    else:
-        session.delete(patient_to_remove[numer-1])
+    patient=Patients(name, surname, address, pesel_number, medical_facility, doctor)
+    session.add(patient)
     session.commit()
 
-def show_patients_from(db)->None:
-    patients_to_show= session.query(Patients)
-    if patients_to_show:
-        for patient in patients_to_show:
-            print(f'Imię pacjenta: {patient.name}, nazwisko: {patient.surname}, PESEL: {patient.pesel_number}  ')
+    patients.append(patient)
+    print(f'Lista Pacjentów {patients}')
+    patient_list()
 
-def update_patient(db) -> None:
-    pesel_number_of_patient = input("Podaj numer PESEL pacjenta do modyfikacji: ")
-    print(pesel_number_of_patient)
-    for patient in session.query(Patients):
-        if patient.pesel_number == pesel_number_of_patient:
-            print("Znaleziono !!!")
-            patient.name= input("Podaj nowe imię pacjenta: ")
-            patient.surname = input("Podaj nowe nazwisko pacjenta: ")
-            patient.adress= int(input("Podaj nowy adres pacjenta: "))
-            patient.pesel_number= input('Podaj nową numer PESEL: ')
-            patient.medical_facility = input('Podaj nową placówkę medyczną do której przypisujesz pacjenta')
-            patient.doctor = input('Podaj nowe imię i nazwisko lekarza prowadzącego')
-            session.commit()
+    entry_name.delete(0,END)
+    entry_surname.delete(0,END)
+    entry_pesel_number.delete(0,END)
+    entry_address.delete(0,END)
+    entry_medical_facility.delete(0,END)
+    entry_doctor.delete(0,END)
+    patient_list()
+    entry_name.focus()
 
-# ===========================================================MAPA=======================================================
+def patient_list():
+    listbox_patients_list.delete(0, END)
+    clients = session.query(Patients).all()
+    for idx,clients in enumerate(clients):
+        listbox_patients_list.insert(idx, f'{clients.name} {clients.surname}')
+        patients.append(clients)
 
-def get_coordinates(address)->list[float,float]:
-    base_url = "https://nominatim.openstreetmap.org/search"
-    params = {"q": address, "format": "json"}
+def show_patient_details():
+    i=listbox_patients_list.index(ACTIVE)
+    name=patients[i].name
+    surname=patients[i].surname
+    pesel_number=patients[i].pesel_number
+    address=patients[i].address
+    medical_facility=patients[i].medical_facility
+    doctor=patients[i].doctor
 
-    response = requests.get(base_url, params)
+    label_name_details_value.config(text=name)
+    label_surname_details_value.config(text=surname)
+    label_pesel_number_details_value.config(text=pesel_number)
+    label_address_details_value.config(text=address)
+    label_medical_facility_details_value.config(text=medical_facility)
+    label_doctor_details_value.config(text=doctor)
 
-    if response.status_code == 200:
-        data = response.json()
-        if data:
-            latitude = data[0]["lat"]
-            longitude = data[0]["lon"]
-            return [latitude, longitude]
-        else:
-            print("Error: Unable to retrieve coordinates from the API.")
-    else:
-        print(f"Error {response.status_code}: Unable to fetch data from the API.")
+def delete_patient():
+    i = listbox_patients_list.index(ACTIVE)
+    patient_to_delete=patients.pop(i)
+    session.delete(patient_to_delete)
+    session.commit()
+    patient_list()
 
-def get_map_one_patient(name)->None:
-    patient = session.query(Patients).filter(Patients.name==name).first()
+def update_patients():
+    i = listbox_patients_list.index(ACTIVE)
+    entry_name.delete(0, END)
+    entry_surname.delete(0, END)
+    entry_pesel_number.delete(0, END)
+    entry_address.delete(0, END)
+    entry_medical_facility.delete(0, END)
+    entry_doctor.delete(0, END)
 
-    adress = get_coordinates(patient.address)
+    entry_name.insert(0,patients[i].name)
+    entry_surname.insert(0,patients[i].surname)
+    entry_pesel_number.insert(0,patients[i].pesel_number)
+    entry_address.insert(0,patients[i].address)
+    entry_medical_facility.insert(0,patients[i].medical_facility)
+    entry_doctor.insert(0,patients[i].doctor)
 
-    map = folium.Map(location=adress,
-                     tiles='OpenStreetMap',
-                     zoom_start=14
-                     )  # location to miejsce wycentrowania mapy
-    folium.Marker(location=adress,
-                  popup=f'Pacjent: {patient.name}\n'
-                        f'{patient.surname}\n'
-                        f'PESEL: {patient.pesel_number}'
-                  ).add_to(map)
-    map.save(f'mapka_{patient.name}.html')
+    button_add_patient.config(text='Zapisz zmiany', command=lambda:update_data(i))
 
-def get_map_of(db)->None:
-    map = folium.Map(location=[52.3,21.0],
-                     tiles='OpenStreetMap',
-                     zoom_start=7
-                     )  # location to miejsce wycentrowania mapy
-    for patients in session.query(Patients):
-        adress = get_coordinates(patients.address)
-        folium.Marker(location=adress,
-                      popup=f'Pacjent: {patients.name}\n'
-                            f'{patients.surname}\n'
-                            f'PESEL: {patients.pesel_number}'
-                      ).add_to(map)
+def update_data(i):
+    patients[i].name=entry_name.get()
+    patients[i].surname=entry_surname.get()
+    patients[i].pesel_number=entry_pesel_number.get()
+    patients[i].address=entry_address.get()
+    patients[i].medical_facility = entry_medical_facility.get()
+    patients[i].doctor = entry_doctor.get()
 
-    map.save('mapka.html')
-#==========================================================GUI==========================================================
-def gui()->None:
-    while True:
-        print(f'MENU: \n'
-              f'0. Zakończ program\n'
-              f'1. Wyświetl uzytkowników\n'
-              f'2. Dodaj użytkownika\n'
-              f'3. Usuń użytkownika\n'
-              f'4. Modyfikuj użytkownika\n'
-              f'5: Wygeneruj mapę z użytkownikiem \n'
-              f'6: Wygeneruj mapę z wszystkimi użytkownikami'
-              )
-        menu_opction=input('Podaj funkcję do wywołania: ')
-        print(f'wybrano funkcję {menu_opction}')
+    session.commit()
 
-        match menu_opction:
-            case '0':
-                print('Kończę pracę. ')
-                break
-            case '1':
-                print('Wyświetlanie listy pacjentów: ')
-                show_patients_from(session)
-            case '2':
-                print('Dodawanie pacjenta: ')
-                add_patient_to(session)
-            case '3':
-                print('Usuwanie pacjenta: ')
-                remove_patient_from(session)
-            case '4':
-                print('Modyfikuję pacjenta: ')
-                update_patient(session)
-            case '5':
-                print('Rysuję mapę z pacjentem. ')
-                name = input("Podaj imię pacjenta do wygenerowania mapy: ")
-                get_map_one_patient(name)
-            case '6':
-                print('Rysuję mapę z wszystkimi pacjentami. ')
-                get_map_of(session)
+    button_add_patient.config(text='Dodaj nowy obiekt', command=add_patient)
+
+    entry_name.delete(0, END)
+    entry_surname.delete(0, END)
+    entry_pesel_number.delete(0, END)
+    entry_address.delete(0, END)
+    entry_medical_facility.delete(0, END)
+    entry_doctor.delete(0, END)
+
+    entry_name.focus()
+    patient_list()
+
+#===============================================================
+root=Tk()
+root.geometry('1400x800')
+root.title('Aplikacja do obsługi bazy szpitali')
+
+frame_patients=Frame(root)
+frame_forms_patients=Frame(root)
+frame_patients_description=Frame(root)
+
+frame_patients.grid(row=0, column=0, padx=50)
+frame_forms_patients.grid(row=0, column=1)
+frame_patients_description.grid(row=1, column=0, columnspan=3, padx=50, pady=20)
+
+label_patients_list=Label(frame_patients, text='Lista obiektów: ')
+listbox_patients_list=Listbox(frame_patients, width=35)
+button_show_detail=Button(frame_patients, text='Pokaż szczegóły', command=show_patient_details)
+button_delete_object=Button(frame_patients, text='Usuń obiekt', command=delete_patient)
+button_eddit_object=Button(frame_patients, text='Edytuj obiekt', command=update_patients)
+
+label_patients_list.grid(row=0, column=0)
+listbox_patients_list.grid(row=1, column=0, columnspan=3)
+button_show_detail.grid(row=2, column=0)
+button_delete_object.grid(row=2, column=1)
+button_eddit_object.grid(row=2, column=2)
+# ===================frame_forms====================================================================
+label_new_object=Label(frame_forms_patients, text='Formularz dodawania i edycji pacjentów: ')
+label_name=Label(frame_forms_patients, text='Imię: ')
+label_surname=Label(frame_forms_patients, text='Nazwisko: ')
+label_pesel_number=Label(frame_forms_patients, text='PESEL: ')
+label_address=Label(frame_forms_patients, text='Adres: ')
+label_medical_facility=Label(frame_forms_patients, text='Szpital: ')
+label_doctor=Label(frame_forms_patients, text='Lekarz: ')
+
+entry_name=Entry(frame_forms_patients)
+entry_surname=Entry(frame_forms_patients, width=30)
+entry_pesel_number=Entry(frame_forms_patients)
+entry_address=Entry(frame_forms_patients, width=30)
+entry_medical_facility=Entry(frame_forms_patients)
+entry_doctor=Entry(frame_forms_patients)
+
+label_new_object.grid(row=0, column=1, columnspan=2)
+label_name.grid(row=1, column=0, sticky=W)
+label_surname.grid(row=2, column=0, sticky=W)
+label_pesel_number.grid(row=3, column=0, sticky=W)
+label_address.grid(row=4, column=0, sticky=W)
+label_medical_facility.grid(row=5, column=0, sticky=W)
+label_doctor.grid(row=6, column=0, sticky=W)
+
+entry_name.grid(row=1, column=1, sticky=W)
+entry_surname.grid(row=2, column=1, sticky=W)
+entry_pesel_number.grid(row=3, column=1, sticky=W)
+entry_address.grid(row=4, column=1, sticky=W)
+entry_medical_facility.grid(row=5, column=1, sticky=W)
+entry_doctor.grid(row=6, column=1, sticky=W)
+
+button_add_patient=Button(frame_forms_patients, text='Dodaj nowy obiekt', command=add_patient)
+button_add_patient.grid(row=8, column=0, columnspan=2)
+#==============================================================================================
+
+label_object_description=Label(frame_patients_description, text='Szczegóły pacjenta')
+label_name_details=Label(frame_patients_description, text='Imię: ')
+label_name_details_value=Label(frame_patients_description, text='...:  ', width=10)
+
+label_surname_details=Label(frame_patients_description, text='Nazwisko: ')
+label_surname_details_value=Label(frame_patients_description, text='...: : ', width=10)
+
+label_pesel_number_details=Label(frame_patients_description, text='PESEL: ')
+label_pesel_number_details_value=Label(frame_patients_description, text='...: : ', width=10)
+
+label_address_details=Label(frame_patients_description, text='Adres: ')
+label_address_details_value=Label(frame_patients_description, text='...: ', width=10)
+
+label_medical_facility_details=Label(frame_patients_description, text='Szpital: ')
+label_medical_facility_details_value=Label(frame_patients_description, text='...: ', width=10)
+
+label_doctor_details=Label(frame_patients_description, text='Lekarz: ')
+label_doctor_details_value=Label(frame_patients_description, text='...: ', width=10)
+
+label_object_description.grid(row=0, column=0, sticky=W)
+
+label_name_details.grid(row=1, column=0)
+label_name_details_value.grid(row=1, column=1)
+label_surname_details.grid(row=1, column=2)
+label_surname_details_value.grid(row=1, column=3)
+label_pesel_number_details.grid(row=1, column=4)
+label_pesel_number_details_value.grid(row=1, column=5)
+label_address_details.grid(row=1, column=6)
+label_address_details_value.grid(row=1, column=7)
+label_medical_facility_details.grid(row=1, column=6)
+label_medical_facility_details_value.grid(row=1, column=7)
+label_doctor_details.grid(row=1, column=8)
+label_doctor_details_value.grid(row=1, column=9)
+#==============================================================================================================================
+# create map widget
+map_widget = tkintermapview.TkinterMapView(frame_patients_description, width=500, height=250, corner_radius=0)
+# set current widget position and zoom
+map_widget.set_position(52.2,21)
+map_widget.set_zoom(13)
+# position widget in app
+map_widget.grid(row=2, column=0, columnspan=8)
+patient_list()
+root.mainloop()
