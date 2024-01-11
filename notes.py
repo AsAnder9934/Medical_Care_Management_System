@@ -32,6 +32,14 @@ class Patients(base):
     medical_facility = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
     doctor = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
 
+    def __init__(self, name, surname, address, pesel_number, medical_facility, doctor):
+        self.name = name
+        self.surname = surname
+        self.address = address
+        self.pesel_number = pesel_number
+        self.medical_facility = medical_facility
+        self.doctor = doctor
+
 base.metadata.create_all(engine)
 
 class Medical_facility(base):
@@ -44,6 +52,13 @@ class Medical_facility(base):
     employee_surname = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
     employee_position = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
 
+    def __init__(self, name_of_clinic, address_of_clinic, employee_name, employee_surname, employee_position):
+        self.name_of_clinic = name_of_clinic
+        self.address_of_clinic = address_of_clinic
+        self.employee_name = employee_name
+        self.employee_surname = employee_surname
+        self.employee_position = employee_position
+
 base.metadata.create_all(engine)
 
 class Employess(base):
@@ -54,6 +69,12 @@ class Employess(base):
     employee_surname = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
     employee_adress = sqlalchemy.Column(sqlalchemy.CHAR(100), nullable=False)
     employee_position = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
+
+    def __init__(self, employee_name, employee_surname, employee_adress, employee_position):
+        self.employee_name = employee_name
+        self.employee_surname = employee_surname
+        self.employee_adress = employee_adress
+        self.employee_position = employee_position
 
 base.metadata.create_all(engine)
 
@@ -234,8 +255,8 @@ def gui()->None:
                 update_patient(session)
             case '5':
                 print('Rysuję mapę z pacjentem. ')
-                Patients.name = input("Podaj imię pacjenta do wygenerowania mapy: ")
-                get_map_one_patient(Patients.name)
+                name = input("Podaj imię pacjenta do wygenerowania mapy: ")
+                get_map_one_patient(name)
             case '6':
                 print('Rysuję mapę z wszystkimi pacjentami. ')
                 get_map_of(session)
