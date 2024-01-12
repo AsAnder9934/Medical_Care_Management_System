@@ -2,6 +2,8 @@ import requests
 from tkinter import *
 import tkintermapview
 from functions import  Medical_facility, session
+from datetime import datetime
+import folium
 
 def GUI_clinics():
     medical_facility=session.query(Medical_facility).all()
@@ -95,7 +97,7 @@ def GUI_clinics():
         medical_facility_list()
 
     #============================coordinates==========================================
-    def get_coordinates()->list[float,float]:
+    def get_coordinates_one()->list[float,float]:
         i = listbox_clinics_list.index(ACTIVE)
         address=medical_facility[i].address_of_clinic
         base_url = "https://nominatim.openstreetmap.org/search"
@@ -110,9 +112,53 @@ def GUI_clinics():
                 longitude = data[0]["lon"]
                 return [float(latitude), float(longitude)]
         medical_facility_list()
+
+    def get_coordinates(address) -> list[float, float]:
+        base_url = "https://nominatim.openstreetmap.org/search"
+        params = {"q": address, "format": "json"}
+
+        response = requests.get(base_url, params)
+
+        if response.status_code == 200:
+            data = response.json()
+            if data:
+                latitude = data[0]["lat"]
+                longitude = data[0]["lon"]
+                return [float(latitude), float(longitude)]
+
+    def get_map_one_patient() -> None:
+        current_date = datetime.now().strftime("%Y.%m.%d")
+        i = listbox_clinics_list.index(ACTIVE)
+        adress = get_coordinates_one()
+        map = folium.Map(location=adress,
+                         tiles='OpenStreetMap',
+                         zoom_start=14
+                         )
+        folium.Marker(location=adress,
+                      popup=f'Pracownik: {medical_facility[i].employee_name}\n'
+                            f'{medical_facility[i].employee_surname}\n'
+                            f'Stanowisko: {medical_facility[i].employee_position}'
+                      ).add_to(map)
+        map.save(f'Pracownik {medical_facility[i].employee_surname}-{current_date}.html')
+
+    def get_map_of() -> None:
+        current_date = datetime.now().strftime("%Y.%m.%d")
+        map = folium.Map(location=[52.0689883, 19.4799726],
+                         tiles='OpenStreetMap',
+                         zoom_start=5
+                         )
+        for clinics in medical_facility:
+            adress = get_coordinates(clinics.address_of_clinic)
+            folium.Marker(location=adress,
+                          popup=f'Pracownik: {clinics.employee_name}\n'
+                                f'{clinics.employee_surname}\n'
+                                f'Stanowisko: {clinics.employee_position}'
+                          ).add_to(map)
+
+        map.save(f'Pracownicy-{current_date}.html')
     # ========================FRAMES===================================
     root=Toplevel()
-    root.geometry('1000x800')
+    root.geometry('800x600')
     root.title('Aplikacja do obsługi bazy szpitali')
 
     frame_clinics=Frame(root)
@@ -121,7 +167,7 @@ def GUI_clinics():
 
     frame_clinics.grid(row=0, column=0, padx=50)
     frame_forms_clinics.grid(row=0, column=1)
-    frame_clinics_description.grid(row=1, column=0, columnspan=3, padx=50, pady=20)
+    frame_clinics_description.grid(row=1, column=0, columnspan=10, padx=50, pady=30)
 
     #==========================frame_object_list_medical_facility==================================
     label_clinics_list=Label(frame_clinics, text='Lista obiektów: ')
@@ -129,13 +175,17 @@ def GUI_clinics():
     button_show_detail=Button(frame_clinics, text='Pokaż szczegóły', command=lambda: [show_medical_facility_details(), set_widget()])
     button_delete_object=Button(frame_clinics, text='Usuń obiekt', command=delete_medical_facility)
     button_eddit_object=Button(frame_clinics, text='Edytuj obiekt', command=update_medical_facility)
+    button_add_map_one=Button(frame_clinics, text='Pobierz mapę', command=get_map_one_patient)
+    button_add_map=Button(frame_clinics, text='Pobierz mapę wszystkich', command=get_map_of)
+
 
     label_clinics_list.grid(row=0, column=0)
     listbox_clinics_list.grid(row=1, column=0, columnspan=3)
     button_show_detail.grid(row=2, column=0)
     button_delete_object.grid(row=2, column=1)
     button_eddit_object.grid(row=2, column=2)
-
+    button_add_map_one.grid(row=2, column=3)
+    button_add_map.grid(row=3, column=0)
     #=======================frame_forms_medical_facility=====================================================
     label_new_object1=Label(frame_forms_clinics, text='Formularz dodawania i edycji szpitali: ')
     label_name_of_clinic=Label(frame_forms_clinics, text='Nazwa szpitala: ')
@@ -172,7 +222,7 @@ def GUI_clinics():
     label_name_of_clinic_details_value=Label(frame_clinics_description, text='...:  ', width=10)
 
     label_address_of_clinic_details=Label(frame_clinics_description, text='Adres: ')
-    label_address_of_clinic_details_value=Label(frame_clinics_description, text='...: : ', width=40)
+    label_address_of_clinic_details_value=Label(frame_clinics_description, text='...: : ', width=70)
 
     label_employee_name_details=Label(frame_clinics_description, text='Imię pracownika: ')
     label_employee_name_details_value=Label(frame_clinics_description, text='...: : ', width=10)
@@ -188,13 +238,13 @@ def GUI_clinics():
     label_name_of_clinic_details.grid(row=1, column=0)
     label_name_of_clinic_details_value.grid(row=1, column=1)
     label_address_of_clinic_details.grid(row=1, column=2)
-    label_address_of_clinic_details_value.grid(row=1, column=6, columnspan=1, sticky=E)
-    label_employee_name_details.grid(row=1, column=7)
-    label_employee_name_details_value.grid(row=1, column=8)
-    label_employee_surname_details.grid(row=1, column=9)
-    label_employee_surname_details_value.grid(row=1, column=10)
-    label_employee_position_details.grid(row=1, column=6)
-    label_employee_position_details_value.grid(row=1, column=7)
+    label_address_of_clinic_details_value.grid(row=1, column=3, columnspan=5)
+    label_employee_name_details.grid(row=2, column=0)
+    label_employee_name_details_value.grid(row=2, column=1)
+    label_employee_surname_details.grid(row=2, column=2)
+    label_employee_surname_details_value.grid(row=2, column=3)
+    label_employee_position_details.grid(row=2, column=4)
+    label_employee_position_details_value.grid(row=2, column=5)
 
     #==============================================================================================================================
     # create map widget
@@ -203,18 +253,18 @@ def GUI_clinics():
     map_widget.set_position(52.0689883, 19.4799726)
     map_widget.set_zoom(5)
     # position widget in app
-    map_widget.grid(row=2, column=0, columnspan=8)
+    map_widget.grid(row=3, column=0, columnspan=7)
     medical_facility_list()
 
     def set_widget():
         map_widget = tkintermapview.TkinterMapView(frame_clinics_description, width=500, height=250, corner_radius=0)
         # set current widget position and zoom
-        coordinates = get_coordinates()
+        coordinates = get_coordinates_one()
         map_widget.set_position(coordinates[0], coordinates[1])
         map_widget.set_marker(coordinates[0], coordinates[1])
         map_widget.set_zoom(13)
         # position widget in app
-        map_widget.grid(row=2, column=0, columnspan=8)
+        map_widget.grid(row=3, column=0, columnspan=7)
         medical_facility_list()
     medical_facility_list()
     root.mainloop()

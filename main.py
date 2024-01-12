@@ -1,10 +1,21 @@
-from tkintermapview import TkinterMapView
 from tkinter import *
 from GUI_patients import GUI_patients
 from GUI_clinics import GUI_clinics
 from GUI_workers import GUI_workers
+from tkinter import messagebox, simpledialog
+
+def login():
+    password = simpledialog.askstring("NFZ", "Podaj hasło dostępu do systemu NFZ:", show='*')
+
+    if password == "2588":
+        messagebox.showinfo("Logowanie pomyślne", "Wciśnij OK, aby kontunuować.")
+        return True
+    else:
+        messagebox.showerror("Logowanie niepomyślne", "Nieprawidłowy login lub hasło!")
+        return False
 
 def app():
+    # if login():
     root = Tk()
     root.geometry('200x250')
     root.title('NFZ')
@@ -22,5 +33,4 @@ def app():
     button_add_workers.grid(padx=20, pady=20)
 
     root.mainloop()
-
 app()
