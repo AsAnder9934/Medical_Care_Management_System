@@ -151,7 +151,7 @@ def GUI_workers():
 
     #=========================FRAMES==================================================================================
     root = Toplevel()
-    root.geometry('800x600')
+    root.geometry('850x600')
     root.title('Aplikacja do obsługi bazy pracowników')
 
     frame_employess = Frame(root)

@@ -159,7 +159,7 @@ def GUI_clinics():
         map.save(f'Pracownicy-{current_date}.html')
     # ========================FRAMES=================================================================================
     root = Toplevel()
-    root.geometry('800x600')
+    root.geometry('850x600')
     root.title('Aplikacja do obsługi bazy szpitali')
 
     frame_clinics = Frame(root)
