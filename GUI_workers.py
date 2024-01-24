@@ -33,9 +33,9 @@ def GUI_workers():
     def employee_list():
         listbox_employess_list.delete(0, END)
         workers = session.query(Employess).all()
-        for idx, workers in enumerate(workers):
-            listbox_employess_list.insert(idx, f'{workers.employee_name} {workers.employee_surname}')
-            employess.append(workers)
+        for idx, worker in enumerate(workers):
+            listbox_employess_list.insert(idx, f'{worker.employee_name} {worker.employee_surname}')
+            employess.append(worker)
 
     def show_employee_details():
         i = listbox_employess_list.index(ACTIVE)
