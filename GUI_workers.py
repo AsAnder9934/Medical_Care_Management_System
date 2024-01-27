@@ -4,6 +4,7 @@ import tkintermapview
 from functions import Employess, session
 from datetime import datetime
 import folium
+from test import GUI_clinics_employes
 
 def GUI_workers():
     employess = session.query(Employess).all()
@@ -171,6 +172,7 @@ def GUI_workers():
     button_eddit_object = Button(frame_employess, text='Edytuj obiekt', command=update_employess)
     button_map_one = Button(frame_employess, text='Pobierz mapę pracownika', command=get_map_one_patient)
     button_map = Button(frame_employess, text='Pobierz mapę wszystkich', command=get_map_of)
+    button_GUI_clinics_employes = Button(frame_employess, text='Zarządzanie szpitalami i pracownikami', command=GUI_clinics_employes)
 
     label_employess_list.grid(row=0, column=0)
     listbox_employess_list.grid(row=1, column=0, columnspan=3)
@@ -179,6 +181,7 @@ def GUI_workers():
     button_eddit_object.grid(row=2, column=2)
     button_map_one.grid(row=2, column=3)
     button_map.grid(row=3, column=3)
+    button_GUI_clinics_employes.grid(row=3, column=0, columnspan=3)
 
     # ===================frame_forms=================================================================================
     label_new_object = Label(frame_forms_employess, text='Formularz dodawania i edycji pracowników: ')
