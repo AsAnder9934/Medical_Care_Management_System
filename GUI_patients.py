@@ -5,6 +5,7 @@ import requests
 import folium
 from datetime import datetime
 
+
 def GUI_patients():
     patients = session.query(Patients).all()
 

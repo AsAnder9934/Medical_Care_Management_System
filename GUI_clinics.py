@@ -4,6 +4,8 @@ import tkintermapview
 from functions import Medical_facility, session
 from datetime import datetime
 import folium
+from test import GUI_clinics_employes
+
 
 def GUI_clinics():
     medical_facility = session.query(Medical_facility).all()
@@ -15,8 +17,7 @@ def GUI_clinics():
         employee_surname = entry_employee_surname.get()
         employee_position = entry_employee_position.get()
 
-        medical_facilities = Medical_facility(name_of_clinic, address_of_clinic, employee_name,
-                                              employee_surname, employee_position)
+        medical_facilities = Medical_facility(name_of_clinic, address_of_clinic)
         session.add(medical_facilities)
         session.commit()
 
@@ -179,7 +180,7 @@ def GUI_clinics():
     button_eddit_object = Button(frame_clinics, text='Edytuj obiekt', command=update_medical_facility)
     button_add_map_one = Button(frame_clinics, text='Pobierz mapę z szpitalem', command=get_map_one_patient)
     button_add_map = Button(frame_clinics, text='Pobierz wszystkie szpitale', command=get_map_of)
-
+    button_GUI_clinics_employes = Button(frame_clinics, text='Zarządzanie szpitalami i pracownikami', command=GUI_clinics_employes)
 
     label_clinics_list.grid(row=0, column=0)
     listbox_clinics_list.grid(row=1, column=0, columnspan=3)
@@ -188,6 +189,8 @@ def GUI_clinics():
     button_eddit_object.grid(row=2, column=2)
     button_add_map_one.grid(row=2, column=3)
     button_add_map.grid(row=3, column=3)
+    button_GUI_clinics_employes.grid(row=3, column=0, columnspan=3)
+
     #=======================frame_forms_medical_facility===========================================================
     label_new_object1 = Label(frame_forms_clinics, text='Formularz dodawania i edycji szpitali: ')
     label_name_of_clinic = Label(frame_forms_clinics, text='Nazwa szpitala: ')

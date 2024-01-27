@@ -45,8 +45,8 @@ base.metadata.create_all(engine)
 class Medical_facility(base):
     __tablename__ = 'medical_facilities'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer(), primary_key=True)                                                  # typ serial (sam będzie odliczał)
-    name_of_clinic = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
+    # id = sqlalchemy.Column(sqlalchemy.String(), primary_key=True)
+    name_of_clinic = sqlalchemy.Column(sqlalchemy.String(100), primary_key=True)
     address_of_clinic = sqlalchemy.Column(sqlalchemy.CHAR(100), nullable=False)
     employee_name = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
     employee_surname = sqlalchemy.Column(sqlalchemy.String(100), nullable=False)
