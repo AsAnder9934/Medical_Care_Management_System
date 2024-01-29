@@ -4,7 +4,7 @@
 ## Table of Contents
 * [Features](#features)
 * [Usage](#usage)
-* [setup](#setup)    #TODO: dokończyć spis treści 
+* [setup](#setup)
 
 ## Features
 ### 1. User Authentication
