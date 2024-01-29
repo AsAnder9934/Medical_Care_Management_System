@@ -11,7 +11,7 @@ def login():
         messagebox.showinfo("Logowanie pomyślne", "Wciśnij OK, aby kontunuować.")
         return True
     else:
-        messagebox.showerror("Logowanie niepomyślne", "Nieprawidłowy login lub hasło!")
+        messagebox.showerror("Logowanie niepomyślne", "Nieprawidłowe hasło!")
         return False
 
 def app():

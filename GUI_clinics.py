@@ -17,7 +17,7 @@ def GUI_clinics():
         employee_surname = entry_employee_surname.get()
         employee_position = entry_employee_position.get()
 
-        medical_facilities = Medical_facility(name_of_clinic, address_of_clinic)
+        medical_facilities = Medical_facility(name_of_clinic, address_of_clinic, employee_name, employee_surname, employee_position)
         session.add(medical_facilities)
         session.commit()
 
